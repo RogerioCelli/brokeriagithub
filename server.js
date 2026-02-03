@@ -42,9 +42,9 @@ app.get('/api/dashboard/stats', async (req, res) => {
         COUNT(CASE WHEN status_atendimento = 'EM_ATENDIMENTO' THEN 1 END) as em_atendimento,
         COUNT(CASE WHEN status_atendimento = 'CONCLUIDO' THEN 1 END) as concluidos,
         COUNT(DISTINCT telefone) as clientes_unicos,
-        COUNT(CASE WHEN DATE(data_contato) = CURRENT_DATE THEN 1 END) as hoje
+        COUNT(CASE WHEN data_atendimento = CURRENT_DATE THEN 1 END) as hoje
       FROM public.brokeria_registros_brokeria
-      WHERE data_contato > NOW() - INTERVAL '30 days'
+      WHERE data_atendimento > NOW() - INTERVAL '30 days'
     `;
         const result = await pool.query(query);
         res.json(result.rows[0]);
@@ -62,15 +62,15 @@ app.get('/api/registros/recentes', async (req, res) => {
       SELECT 
         id_atendimento,
         telefone,
-        nome_whatsapp,
-        tipo_solicitacao,
+        nome_cliente as nome_whatsapp,
+        tipo_seguro as tipo_solicitacao,
         status_atendimento,
         qtde_mensagens,
         etapa_funil,
-        data_contato,
-        SUBSTRING(mensagem_inicial, 1, 150) as mensagem_resumo
+        data_atendimento as data_contato,
+        SUBSTRING(resumo_conversa, 1, 150) as mensagem_resumo
       FROM public.brokeria_registros_brokeria
-      ORDER BY data_contato DESC
+      ORDER BY data_criacao_registro DESC
       LIMIT $1
     `;
         const result = await pool.query(query, [limit]);
@@ -86,12 +86,12 @@ app.get('/api/registros/por-tipo', async (req, res) => {
     try {
         const query = `
       SELECT 
-        tipo_solicitacao,
+        tipo_seguro as tipo_solicitacao,
         COUNT(*) as total,
         COUNT(CASE WHEN status_atendimento = 'PENDENTE' THEN 1 END) as pendentes
       FROM public.brokeria_registros_brokeria
-      WHERE data_contato > NOW() - INTERVAL '30 days'
-      GROUP BY tipo_solicitacao
+      WHERE data_atendimento > NOW() - INTERVAL '30 days'
+      GROUP BY tipo_seguro
       ORDER BY total DESC
     `;
         const result = await pool.query(query);
@@ -111,7 +111,7 @@ app.get('/api/registros/por-etapa', async (req, res) => {
         COUNT(*) as total,
         AVG(qtde_mensagens) as media_mensagens
       FROM public.brokeria_registros_brokeria
-      WHERE data_contato > NOW() - INTERVAL '30 days'
+      WHERE data_atendimento > NOW() - INTERVAL '30 days'
       GROUP BY etapa_funil
       ORDER BY total DESC
     `;
@@ -128,12 +128,12 @@ app.get('/api/registros/por-dia', async (req, res) => {
     try {
         const query = `
       SELECT 
-        DATE(data_contato) as data,
+        data_atendimento as data,
         COUNT(*) as total_registros,
         COUNT(DISTINCT telefone) as clientes_unicos
       FROM public.brokeria_registros_brokeria
-      WHERE data_contato > NOW() - INTERVAL '30 days'
-      GROUP BY DATE(data_contato)
+      WHERE data_atendimento > NOW() - INTERVAL '30 days'
+      GROUP BY data_atendimento
       ORDER BY data ASC
     `;
         const result = await pool.query(query);
@@ -149,7 +149,11 @@ app.get('/api/registros/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const query = `
-      SELECT *
+      SELECT *, 
+             nome_cliente as nome_whatsapp, 
+             tipo_seguro as tipo_solicitacao, 
+             resumo_conversa as mensagem_inicial,
+             data_atendimento as data_contato
       FROM public.brokeria_registros_brokeria
       WHERE id_atendimento = $1
     `;
@@ -169,10 +173,14 @@ app.get('/api/registros/telefone/:telefone', async (req, res) => {
     try {
         const { telefone } = req.params;
         const query = `
-      SELECT *
+      SELECT *, 
+             nome_cliente as nome_whatsapp, 
+             tipo_seguro as tipo_solicitacao, 
+             resumo_conversa as mensagem_inicial,
+             data_atendimento as data_contato
       FROM public.brokeria_registros_brokeria
       WHERE telefone = $1
-      ORDER BY data_contato DESC
+      ORDER BY data_criacao_registro DESC
     `;
         const result = await pool.query(query, [telefone]);
         res.json(result.rows);
@@ -191,17 +199,16 @@ app.get('/api/registros/filtrar', async (req, res) => {
       SELECT 
         id_atendimento,
         telefone,
-        nome_whatsapp,
-        tipo_solicitacao,
+        nome_cliente as nome_whatsapp,
+        tipo_seguro as tipo_solicitacao,
         status_atendimento,
         qtde_mensagens,
         etapa_funil,
-        data_contato,
-        SUBSTRING(mensagem_inicial, 1, 150) as mensagem_resumo
+        data_atendimento as data_contato,
+        SUBSTRING(resumo_conversa, 1, 150) as mensagem_resumo
       FROM public.brokeria_registros_brokeria
       WHERE 1=1
     `;
-
         const params = [];
         let paramCount = 1;
 
@@ -212,7 +219,7 @@ app.get('/api/registros/filtrar', async (req, res) => {
         }
 
         if (tipo) {
-            query += ` AND tipo_solicitacao = $${paramCount}`;
+            query += ` AND tipo_seguro = $${paramCount}`;
             params.push(tipo);
             paramCount++;
         }
@@ -224,18 +231,18 @@ app.get('/api/registros/filtrar', async (req, res) => {
         }
 
         if (dataInicio) {
-            query += ` AND data_contato >= $${paramCount}`;
+            query += ` AND data_atendimento >= $${paramCount}`;
             params.push(dataInicio);
             paramCount++;
         }
 
         if (dataFim) {
-            query += ` AND data_contato <= $${paramCount}`;
+            query += ` AND data_atendimento <= $${paramCount}`;
             params.push(dataFim);
             paramCount++;
         }
 
-        query += ` ORDER BY data_contato DESC LIMIT 100`;
+        query += ` ORDER BY data_atendimento DESC LIMIT 100`;
 
         const result = await pool.query(query, params);
         res.json(result.rows);
