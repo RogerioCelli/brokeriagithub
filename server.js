@@ -61,14 +61,6 @@ const setupAdmin = async () => {
                 ['admin', hash, 'Administrador', 'admin']
             );
             console.log('✅ Admin inicial criado: admin / brokeria2025');
-        } else {
-            const salt = await bcrypt.genSalt(10);
-            const hash = await bcrypt.hash('brokeria2025', salt);
-            await pool.query(
-                'UPDATE public.brokeria_users SET password_hash = $1 WHERE username = $2',
-                [hash, 'admin']
-            );
-            console.log('✅ Senha do admin atualizada para: brokeria2025');
         }
     } catch (err) {
         console.error('Erro ao configurar admin:', err);
