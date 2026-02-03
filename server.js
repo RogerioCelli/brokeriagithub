@@ -48,27 +48,27 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Criar admin inicial se não existir ou corrigir senha
+// Criar admin inicial se não existir
 const setupAdmin = async () => {
     try {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash('admin123', salt);
-
         const check = await pool.query('SELECT id FROM public.brokeria_users WHERE username = $1', ['admin']);
 
         if (check.rows.length === 0) {
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash('brokeria2025', salt);
             await pool.query(
                 'INSERT INTO public.brokeria_users (username, password_hash, nome, role) VALUES ($1, $2, $3, $4)',
                 ['admin', hash, 'Administrador', 'admin']
             );
-            console.log('✅ Admin inicial criado: admin / admin123');
+            console.log('✅ Admin inicial criado: admin / brokeria2025');
         } else {
-            // Garante que a senha seja admin123 para este teste
+            const salt = await bcrypt.genSalt(10);
+            const hash = await bcrypt.hash('brokeria2025', salt);
             await pool.query(
                 'UPDATE public.brokeria_users SET password_hash = $1 WHERE username = $2',
                 [hash, 'admin']
             );
-            console.log('✅ Senha do admin resetada para: admin123');
+            console.log('✅ Senha do admin atualizada para: brokeria2025');
         }
     } catch (err) {
         console.error('Erro ao configurar admin:', err);
