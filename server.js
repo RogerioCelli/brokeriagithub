@@ -153,7 +153,9 @@ app.get('/api/registros/:id', async (req, res) => {
              nome_cliente as nome_whatsapp, 
              tipo_seguro as tipo_solicitacao, 
              resumo_conversa as mensagem_inicial,
-             data_atendimento as data_contato
+             data_atendimento as data_contato,
+             id_conversa_whatsapp as session_id,
+             origem_lead as origem
       FROM public.brokeria_registros_brokeria
       WHERE id_atendimento = $1
     `;
@@ -177,7 +179,9 @@ app.get('/api/registros/telefone/:telefone', async (req, res) => {
              nome_cliente as nome_whatsapp, 
              tipo_seguro as tipo_solicitacao, 
              resumo_conversa as mensagem_inicial,
-             data_atendimento as data_contato
+             data_atendimento as data_contato,
+             id_conversa_whatsapp as session_id,
+             origem_lead as origem
       FROM public.brokeria_registros_brokeria
       WHERE telefone = $1
       ORDER BY data_criacao_registro DESC
