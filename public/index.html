@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard WhatsApp - BrokerIA</title>
+    <meta name="description" content="Dashboard de monitoramento de interações do WhatsApp com clientes">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 13.54 2.36 14.99 3.01 16.26L2 22L7.74 20.99C9.01 21.64 10.46 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C10.69 20 9.45 19.66 8.38 19.06L8.12 18.91L4.85 19.75L5.7 16.53L5.53 16.26C4.88 15.15 4.5 13.87 4.5 12.5C4.5 7.81 8.31 4 13 4C17.69 4 21.5 7.81 21.5 12.5C21.5 17.19 17.69 21 13 21H12V20Z" fill="currentColor"/>
+                </svg>
+                <h1>BrokerIA Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon" id="refreshBtn" title="Atualizar dados">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4C7.58 4 4.01 7.58 4.01 12C4.01 16.42 7.58 20 12 20C15.73 20 18.84 17.45 19.73 14H17.65C16.83 16.33 14.61 18 12 18C8.69 18 6 15.31 6 12C6 8.69 8.69 6 12 6C13.66 6 15.14 6.69 16.22 7.78L13 11H20V4L17.65 6.35Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Conectado</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Stats Cards -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-primary">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M16 11C17.66 11 18.99 9.66 18.99 8C18.99 6.34 17.66 5 16 5C14.34 5 13 6.34 13 8C13 9.66 14.34 11 16 11ZM8 11C9.66 11 10.99 9.66 10.99 8C10.99 6.34 9.66 5 8 5C6.34 5 5 6.34 5 8C5 9.66 6.34 11 8 11ZM8 13C5.67 13 1 14.17 1 16.5V19H15V16.5C15 14.17 10.33 13 8 13ZM16 13C15.71 13 15.38 13.02 15.03 13.05C16.19 13.89 17 15.02 17 16.5V19H23V16.5C23 14.17 18.33 13 16 13Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" id="totalRegistros">-</h3>
+                    <p class="stat-label">Total de Registros</p>
+                    <span class="stat-badge stat-badge-info" id="badgeHoje">0 hoje</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-warning">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" id="totalPendentes">-</h3>
+                    <p class="stat-label">Pendentes</p>
+                    <span class="stat-badge stat-badge-warning">Aguardando</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-info">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12.5 7H11V13L16.25 16.15L17 14.92L12.5 12.25V7Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" id="totalEmAtendimento">-</h3>
+                    <p class="stat-label">Em Atendimento</p>
+                    <span class="stat-badge stat-badge-info">Ativo</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon stat-icon-success">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12L3.41 13.41L9 19L21 7L19.59 5.59L9 16.17Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-value" id="totalConcluidos">-</h3>
+                    <p class="stat-label">Concluídos</p>
+                    <span class="stat-badge stat-badge-success">Finalizados</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Por Tipo de Solicitação</h2>
+                </div>
+                <div class="chart-content" id="chartTipos">
+                    <div class="loading">Carregando...</div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Por Etapa do Funil</h2>
+                </div>
+                <div class="chart-content" id="chartEtapas">
+                    <div class="loading">Carregando...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Timeline Chart -->
+        <section class="timeline-section">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Registros dos Últimos 30 Dias</h2>
+                </div>
+                <div class="chart-content">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="filters-section">
+            <div class="filters-card">
+                <h2 class="filters-title">Filtros</h2>
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="filterStatus">Status</label>
+                        <select id="filterStatus" class="filter-select">
+                            <option value="">Todos</option>
+                            <option value="PENDENTE">Pendente</option>
+                            <option value="EM_ATENDIMENTO">Em Atendimento</option>
+                            <option value="CONCLUIDO">Concluído</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterTipo">Tipo de Solicitação</label>
+                        <select id="filterTipo" class="filter-select">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterEtapa">Etapa do Funil</label>
+                        <select id="filterEtapa" class="filter-select">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <button class="btn-primary" id="applyFilters">Aplicar Filtros</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Records Table -->
+        <section class="table-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <h2 class="table-title">Registros Recentes</h2>
+                    <div class="table-actions">
+                        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por telefone ou nome...">
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Data/Hora</th>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>Tipo</th>
+                                <th>Status</th>
+                                <th>Etapa</th>
+                                <th>Msgs</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recordsTableBody">
+                            <tr>
+                                <td colspan="9" class="loading-row">
+                                    <div class="loading">Carregando registros...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal" id="recordModal">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalhes do Registro</h2>
+                <button class="modal-close" id="modalClose">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="loading">Carregando...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

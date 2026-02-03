@@ -1,0 +1,27 @@
+{
+    "name": "dashboard-whatsapp-brokeria",
+    "version": "1.0.0",
+    "description": "Dashboard para visualização de interações do WhatsApp",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js"
+    },
+    "keywords": [
+        "dashboard",
+        "whatsapp",
+        "postgres",
+        "brokeria"
+    ],
+    "author": "",
+    "license": "MIT",
+    "dependencies": {
+        "express": "^4.18.2",
+        "pg": "^8.11.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    }
+}
