@@ -4,12 +4,38 @@ const API_URL = window.location.origin;
 // Estado global
 let allRecords = [];
 let filteredRecords = [];
+let currentUser = null;
+let authToken = localStorage.getItem('authToken');
 
 // ========== INICIALIZAÇÃO ==========
 document.addEventListener('DOMContentLoaded', () => {
-    initializeApp();
+    if (authToken) {
+        showApp();
+        initializeApp();
+    } else {
+        showLogin();
+    }
     setupEventListeners();
 });
+
+function showLogin() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('appContainer').style.display = 'none';
+    document.body.classList.add('login-page');
+}
+
+function showApp() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    document.body.classList.remove('login-page');
+
+    // Atualizar UI do usuário
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+        document.getElementById('userName').textContent = user.nome || user.username;
+        document.getElementById('userRole').textContent = user.role === 'admin' ? 'Administrador' : 'Usuário';
+    }
+}
 
 async function initializeApp() {
     await loadDashboardStats();
@@ -20,6 +46,12 @@ async function initializeApp() {
 }
 
 function setupEventListeners() {
+    // Login Form
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+    // Logout button
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+
     // Refresh button
     document.getElementById('refreshBtn').addEventListener('click', () => {
         initializeApp();
@@ -36,10 +68,77 @@ function setupEventListeners() {
     document.getElementById('modalOverlay').addEventListener('click', closeModal);
 }
 
+async function handleLogin(e) {
+    e.preventDefault();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+
+    errorEl.textContent = '';
+    btn.disabled = true;
+    btn.textContent = 'Autenticando...';
+
+    try {
+        const response = await fetch(`${API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            authToken = data.token;
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+            showApp();
+            initializeApp();
+        } else {
+            errorEl.textContent = data.error || 'Erro ao realizar login';
+        }
+    } catch (error) {
+        console.error('Erro no login:', error);
+        errorEl.textContent = 'Erro de conexão com o servidor';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    authToken = null;
+    showLogin();
+}
+
+// Wrapper para fetch com autenticação
+async function authenticatedFetch(url, options = {}) {
+    if (!authToken) {
+        handleLogout();
+        return;
+    }
+
+    const headers = {
+        ...options.headers,
+        'Authorization': `Bearer ${authToken}`
+    };
+
+    const response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401 || response.status === 403) {
+        handleLogout();
+        throw new Error('Sessão expirada');
+    }
+
+    return response;
+}
+
 // ========== DASHBOARD STATS ==========
 async function loadDashboardStats() {
     try {
-        const response = await fetch(`${API_URL}/api/dashboard/stats`);
+        const response = await authenticatedFetch(`${API_URL}/api/dashboard/stats`);
         const stats = await response.json();
 
         document.getElementById('totalRegistros').textContent = stats.total_registros || 0;
@@ -57,7 +156,7 @@ async function loadDashboardStats() {
 // ========== RECORDS TABLE ==========
 async function loadRecentRecords(limit = 50) {
     try {
-        const response = await fetch(`${API_URL}/api/registros/recentes?limit=${limit}`);
+        const response = await authenticatedFetch(`${API_URL}/api/registros/recentes?limit=${limit}`);
         allRecords = await response.json();
         filteredRecords = [...allRecords];
         renderRecordsTable(filteredRecords);
@@ -114,7 +213,7 @@ async function loadChartData() {
 
 async function loadTiposChart() {
     try {
-        const response = await fetch(`${API_URL}/api/registros/por-tipo`);
+        const response = await authenticatedFetch(`${API_URL}/api/registros/por-tipo`);
         const data = await response.json();
 
         const container = document.getElementById('chartTipos');
@@ -150,7 +249,7 @@ async function loadTiposChart() {
 
 async function loadEtapasChart() {
     try {
-        const response = await fetch(`${API_URL}/api/registros/por-etapa`);
+        const response = await authenticatedFetch(`${API_URL}/api/registros/por-etapa`);
         const data = await response.json();
 
         const container = document.getElementById('chartEtapas');
@@ -192,7 +291,7 @@ let timelineChartInstance = null;
 
 async function loadTimelineChart() {
     try {
-        const response = await fetch(`${API_URL}/api/registros/por-dia`);
+        const response = await authenticatedFetch(`${API_URL}/api/registros/por-dia`);
         const data = await response.json();
 
         const ctx = document.getElementById('timelineChart').getContext('2d');
@@ -304,7 +403,7 @@ async function loadTimelineChart() {
 async function populateFilterOptions() {
     try {
         // Tipos de solicitação
-        const tiposResponse = await fetch(`${API_URL}/api/registros/por-tipo`);
+        const tiposResponse = await authenticatedFetch(`${API_URL}/api/registros/por-tipo`);
         const tipos = await tiposResponse.json();
 
         const tipoSelect = document.getElementById('filterTipo');
@@ -316,7 +415,7 @@ async function populateFilterOptions() {
         });
 
         // Etapas do funil
-        const etapasResponse = await fetch(`${API_URL}/api/registros/por-etapa`);
+        const etapasResponse = await authenticatedFetch(`${API_URL}/api/registros/por-etapa`);
         const etapas = await etapasResponse.json();
 
         const etapaSelect = document.getElementById('filterEtapa');
@@ -343,7 +442,7 @@ async function applyFilters() {
     if (etapa) params.append('etapa', etapa);
 
     try {
-        const response = await fetch(`${API_URL}/api/registros/filtrar?${params.toString()}`);
+        const response = await authenticatedFetch(`${API_URL}/api/registros/filtrar?${params.toString()}`);
         filteredRecords = await response.json();
         renderRecordsTable(filteredRecords);
     } catch (error) {
@@ -381,7 +480,7 @@ async function viewRecord(id) {
     modalBody.innerHTML = '<div class="loading">Carregando...</div>';
 
     try {
-        const response = await fetch(`${API_URL}/api/registros/${id}`);
+        const response = await authenticatedFetch(`${API_URL}/api/registros/${id}`);
         const record = await response.json();
 
         modalBody.innerHTML = `

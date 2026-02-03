@@ -2,7 +2,11 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
+
+const JWT_SECRET = process.env.JWT_SECRET || 'brokeria-secret-key-2024';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -30,10 +34,89 @@ pool.query('SELECT NOW()', (err, res) => {
     }
 });
 
-// ========== ROTAS DA API ==========
+// Middleware de Autenticação
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) return res.status(401).json({ error: 'Acesso negado' });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Token inválido ou expirado' });
+        req.user = user;
+        next();
+    });
+};
+
+// ========== ROTAS DE AUTENTICAÇÃO ==========
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    try {
+        const query = 'SELECT * FROM public.brokeria_users WHERE username = $1';
+        const result = await pool.query(query, [username]);
+
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Usuário ou senha incorretos' });
+        }
+
+        const user = result.rows[0];
+        const validPassword = await bcrypt.compare(password, user.password_hash);
+
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Usuário ou senha incorretos' });
+        }
+
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role, nome: user.nome },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        res.json({
+            token,
+            user: {
+                username: user.username,
+                nome: user.nome,
+                role: user.role
+            }
+        });
+
+    } catch (err) {
+        console.error('Erro no login:', err);
+        res.status(500).json({ error: 'Erro ao processar login' });
+    }
+});
+
+// Criar usuário (Apenas Admin)
+app.post('/api/auth/register', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Apenas administradores podem criar novos usuários' });
+    }
+
+    const { username, password, nome, role } = req.body;
+
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        const query = 'INSERT INTO public.brokeria_users (username, password_hash, nome, role) VALUES ($1, $2, $3, $4) RETURNING id';
+        const result = await pool.query(query, [username, password_hash, nome, role || 'user']);
+
+        res.status(201).json({ message: 'Usuário criado com sucesso', id: result.rows[0].id });
+
+    } catch (err) {
+        console.error('Erro ao registrar usuário:', err);
+        res.status(500).json({ error: 'Erro ao criar usuário' });
+    }
+});
+
+// ========== ROTAS DA API PROTEGIDAS ==========
 
 // 1. Dashboard - Estatísticas gerais
-app.get('/api/dashboard/stats', async (req, res) => {
+app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     try {
         const query = `
       SELECT 
@@ -55,7 +138,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
 });
 
 // 2. Registros recentes
-app.get('/api/registros/recentes', async (req, res) => {
+app.get('/api/registros/recentes', authenticateToken, async (req, res) => {
     try {
         const limit = req.query.limit || 20;
         const query = `
@@ -82,7 +165,7 @@ app.get('/api/registros/recentes', async (req, res) => {
 });
 
 // 3. Registros por tipo de solicitação
-app.get('/api/registros/por-tipo', async (req, res) => {
+app.get('/api/registros/por-tipo', authenticateToken, async (req, res) => {
     try {
         const query = `
       SELECT 
@@ -103,7 +186,7 @@ app.get('/api/registros/por-tipo', async (req, res) => {
 });
 
 // 4. Registros por etapa do funil
-app.get('/api/registros/por-etapa', async (req, res) => {
+app.get('/api/registros/por-etapa', authenticateToken, async (req, res) => {
     try {
         const query = `
       SELECT 
@@ -124,7 +207,7 @@ app.get('/api/registros/por-etapa', async (req, res) => {
 });
 
 // 5. Registros por dia (últimos 30 dias)
-app.get('/api/registros/por-dia', async (req, res) => {
+app.get('/api/registros/por-dia', authenticateToken, async (req, res) => {
     try {
         const query = `
       SELECT 
@@ -145,7 +228,7 @@ app.get('/api/registros/por-dia', async (req, res) => {
 });
 
 // 6. Buscar registro específico
-app.get('/api/registros/:id', async (req, res) => {
+app.get('/api/registros/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
         const query = `
@@ -171,7 +254,7 @@ app.get('/api/registros/:id', async (req, res) => {
 });
 
 // 7. Buscar por telefone
-app.get('/api/registros/telefone/:telefone', async (req, res) => {
+app.get('/api/registros/telefone/:telefone', authenticateToken, async (req, res) => {
     try {
         const { telefone } = req.params;
         const query = `
@@ -195,7 +278,7 @@ app.get('/api/registros/telefone/:telefone', async (req, res) => {
 });
 
 // 8. Filtrar registros
-app.get('/api/registros/filtrar', async (req, res) => {
+app.get('/api/registros/filtrar', authenticateToken, async (req, res) => {
     try {
         const { status, tipo, etapa, dataInicio, dataFim } = req.query;
 
