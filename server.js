@@ -171,7 +171,7 @@ app.get('/api/registros/recentes', authenticateToken, async (req, res) => {
         status_atendimento,
         qtde_mensagens,
         etapa_funil,
-        data_criacao_registro AT TIME ZONE 'PST' AT TIME ZONE 'America/Sao_Paulo' as data_contato,
+        data_criacao_registro as data_contato,
         SUBSTRING(resumo_conversa, 1, 150) as mensagem_resumo
       FROM public.brokeria_registros_brokeria
       ORDER BY data_criacao_registro DESC
@@ -258,7 +258,7 @@ app.get('/api/registros/:id', authenticateToken, async (req, res) => {
              tipo_seguro,
              assunto_principal as tipo_solicitacao, 
              resumo_conversa as mensagem_inicial,
-             data_criacao_registro AT TIME ZONE 'PST' AT TIME ZONE 'America/Sao_Paulo' as data_contato,
+             data_criacao_registro as data_contato,
              canal as origem
       FROM public.brokeria_registros_brokeria
       WHERE id_atendimento = $1
@@ -283,7 +283,7 @@ app.get('/api/registros/telefone/:telefone', authenticateToken, async (req, res)
              nome_cliente as nome_whatsapp, 
              assunto_principal as tipo_solicitacao, 
              resumo_conversa as mensagem_inicial,
-             data_criacao_registro AT TIME ZONE 'PST' AT TIME ZONE 'America/Sao_Paulo' as data_contato,
+             data_criacao_registro as data_contato,
              canal as origem
       FROM public.brokeria_registros_brokeria
       WHERE telefone_whatsapp = $1
@@ -316,7 +316,7 @@ app.get('/api/registros/filtrar', authenticateToken, async (req, res) => {
         status_atendimento,
         qtde_mensagens,
         etapa_funil,
-        data_criacao_registro AT TIME ZONE 'PST' AT TIME ZONE 'America/Sao_Paulo' as data_contato,
+        data_criacao_registro as data_contato,
         SUBSTRING(resumo_conversa, 1, 150) as mensagem_resumo
       FROM public.brokeria_registros_brokeria
       WHERE 1=1

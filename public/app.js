@@ -449,8 +449,12 @@ async function applyFilters() {
     if (prioridade) params.append('prioridade', prioridade);
     if (tipoCliente) params.append('tipoCliente', tipoCliente);
 
+    console.log('Aplicando filtros com params:', params.toString());
+
     try {
-        const response = await authenticatedFetch(`${API_URL}/api/registros/filtrar?${params.toString()}`);
+        const url = `${API_URL}/api/registros/filtrar?${params.toString()}`;
+        console.log('Fetching URL:', url);
+        const response = await authenticatedFetch(url);
         if (!response.ok) throw new Error('Falha na resposta da API');
         filteredRecords = await response.json();
         renderRecordsTable(filteredRecords);
