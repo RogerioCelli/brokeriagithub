@@ -330,8 +330,8 @@ app.get('/api/registros/filtrar', authenticateToken, async (req, res) => {
             paramCount++;
         }
         if (tipo) {
-            query += ` AND assunto_principal = $${paramCount}`;
-            params.push(tipo);
+            query += ` AND assunto_principal ILIKE $${paramCount}`;
+            params.push(`%${tipo}%`);
             paramCount++;
         }
         if (seguro) {
@@ -340,18 +340,18 @@ app.get('/api/registros/filtrar', authenticateToken, async (req, res) => {
             paramCount++;
         }
         if (subtipo) {
-            query += ` AND subtipo_solicitacao = $${paramCount}`;
-            params.push(subtipo);
+            query += ` AND subtipo_solicitacao ILIKE $${paramCount}`;
+            params.push(`%${subtipo}%`);
             paramCount++;
         }
         if (prioridade) {
-            query += ` AND prioridade = $${paramCount}`;
-            params.push(prioridade);
+            query += ` AND prioridade ILIKE $${paramCount}`;
+            params.push(`%${prioridade}%`);
             paramCount++;
         }
         if (tipoCliente) {
-            query += ` AND tipo_cliente = $${paramCount}`;
-            params.push(tipoCliente);
+            query += ` AND tipo_cliente ILIKE $${paramCount}`;
+            params.push(`%${tipoCliente}%`);
             paramCount++;
         }
 

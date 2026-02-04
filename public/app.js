@@ -59,6 +59,7 @@ function setupEventListeners() {
 
     // Apply filters
     document.getElementById('applyFilters').addEventListener('click', applyFilters);
+    document.getElementById('clearFilters').addEventListener('click', resetFilters);
 
     // Search input
     document.getElementById('searchInput').addEventListener('input', handleSearch);
@@ -462,6 +463,19 @@ async function applyFilters() {
         console.error('Erro ao aplicar filtros:', error);
         showError('Erro ao aplicar filtros');
     }
+}
+
+async function resetFilters() {
+    document.getElementById('filterStatus').value = '';
+    document.getElementById('filterSeguro').value = '';
+    document.getElementById('filterTipo').value = '';
+    document.getElementById('filterPrioridade').value = '';
+    document.getElementById('filterCliente').value = '';
+    if (document.getElementById('searchInput')) {
+        document.getElementById('searchInput').value = '';
+    }
+
+    await loadRecentRecords();
 }
 
 // ========== SEARCH ==========
