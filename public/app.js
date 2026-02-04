@@ -610,15 +610,32 @@ function formatStatus(status) {
         'PENDENTE': 'Pendente',
         'EM_ATENDIMENTO': 'Em Atendimento',
         'CONCLUIDO': 'Concluído',
-        'CANCELADO': 'Cancelado'
+        'CANCELADO': 'Cancelado',
+        'COTACAO_SOLICITADA': 'Cotação Solicitada',
+        'COTACAO': 'Cotação'
     };
     return statusMap[status] || status;
+}
+
+function translateLabel(t) {
+    if (!t) return 'N/A';
+    const m = {
+        'NAO_IDENTIFICADO': 'Não Identificado',
+        'AUTOMOVEL': '🚗 Automóvel',
+        'RESIDENCIAL': '🏠 Residencial',
+        'VIDA': '👨‍👩‍👧‍👦 Vida',
+        'SAUDE': '🏥 Saúde',
+        'EMPRESARIAL': '🏢 Empresarial',
+        'COTACAO': 'Cotação',
+        'COTACAO_SOLICITADA': 'Cotação'
+    };
+    return m[t] || t;
 }
 
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
-    div.textContent = text;
+    div.textContent = translateLabel(text);
     return div.innerHTML;
 }
 
