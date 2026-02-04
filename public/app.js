@@ -186,6 +186,11 @@ function renderRecordsTable(records) {
             <td>${formatDateTime(record.data_contato)}</td>
             <td>${escapeHtml(record.nome_whatsapp || 'N/A')}</td>
             <td>${formatPhone(record.telefone)}</td>
+            <td>
+                <span class="badge-seguro badge-seguro-${(record.tipo_seguro || 'NAO_IDENTIFICADO').toLowerCase()}">
+                    ${getInsuranceIcon(record.tipo_seguro)} ${escapeHtml(record.tipo_seguro || 'NAO_IDENTIFICADO')}
+                </span>
+            </td>
             <td>${escapeHtml(record.tipo_solicitacao || 'N/A')}</td>
             <td>
                 <span class="status-badge-table status-${record.status_atendimento}">
@@ -196,7 +201,7 @@ function renderRecordsTable(records) {
             <td>${record.qtde_mensagens || 0}</td>
             <td>
                 <button class="btn-view" onclick="viewRecord(${record.id_atendimento})">
-                    Ver Detalhes
+                    Ver Chat
                 </button>
             </td>
         </tr>
@@ -433,11 +438,13 @@ async function populateFilterOptions() {
 
 async function applyFilters() {
     const status = document.getElementById('filterStatus').value;
+    const seguro = document.getElementById('filterSeguro').value;
     const tipo = document.getElementById('filterTipo').value;
     const etapa = document.getElementById('filterEtapa').value;
 
     const params = new URLSearchParams();
     if (status) params.append('status', status);
+    if (seguro) params.append('seguro', seguro);
     if (tipo) params.append('tipo', tipo);
     if (etapa) params.append('etapa', etapa);
 
@@ -464,7 +471,8 @@ function handleSearch(e) {
         return (
             record.telefone?.toLowerCase().includes(searchTerm) ||
             record.nome_whatsapp?.toLowerCase().includes(searchTerm) ||
-            record.tipo_solicitacao?.toLowerCase().includes(searchTerm)
+            record.tipo_solicitacao?.toLowerCase().includes(searchTerm) ||
+            record.tipo_seguro?.toLowerCase().includes(searchTerm)
         );
     });
 
@@ -484,64 +492,38 @@ async function viewRecord(id) {
         const record = await response.json();
 
         modalBody.innerHTML = `
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="detail-label">ID do Atendimento</span>
-                    <span class="detail-value">#${record.id_atendimento}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Data/Hora do Contato</span>
-                    <span class="detail-value">${formatDateTime(record.data_contato)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Nome no WhatsApp</span>
-                    <span class="detail-value">${escapeHtml(record.nome_whatsapp || 'N/A')}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Telefone</span>
-                    <span class="detail-value">${formatPhone(record.telefone)}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Tipo de Solicitação</span>
-                    <span class="detail-value">${escapeHtml(record.tipo_solicitacao || 'N/A')}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Status do Atendimento</span>
-                    <span class="detail-value">
-                        <span class="status-badge-table status-${record.status_atendimento}">
-                            ${formatStatus(record.status_atendimento)}
-                        </span>
-                    </span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Etapa do Funil</span>
-                    <span class="detail-value">${escapeHtml(record.etapa_funil || 'N/A')}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Quantidade de Mensagens</span>
-                    <span class="detail-value">${record.qtde_mensagens || 0}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Recebeu Arquivos</span>
-                    <span class="detail-value">${record.recebeu_arquivos ? 'Sim' : 'Não'}</span>
-                </div>
-                ${record.tipos_documentos ? `
+            <div class="modal-details">
+                <div class="details-grid">
                     <div class="detail-item">
-                        <span class="detail-label">Tipos de Documentos</span>
-                        <span class="detail-value">${escapeHtml(record.tipos_documentos)}</span>
+                        <span class="detail-label">Cliente</span>
+                        <div class="detail-value">${escapeHtml(record.nome_whatsapp || 'N/A')}</div>
                     </div>
-                ` : ''}
-                <div class="detail-item">
-                    <span class="detail-label">Session ID</span>
-                    <span class="detail-value">${escapeHtml(record.session_id || 'N/A')}</span>
+                    <div class="detail-item">
+                        <span class="detail-label">WhatsApp</span>
+                        <div class="detail-value">${formatPhone(record.telefone)}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Seguro</span>
+                        <div class="detail-value">
+                            <span class="badge-seguro badge-seguro-${(record.tipo_seguro || 'NAO_IDENTIFICADO').toLowerCase()}">
+                                ${getInsuranceIcon(record.tipo_seguro)} ${escapeHtml(record.tipo_seguro || 'NAO_IDENTIFICADO')}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Assunto</span>
+                        <div class="detail-value">${escapeHtml(record.tipo_solicitacao || 'N/A')}</div>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <span class="detail-label">Origem</span>
-                    <span class="detail-value">${escapeHtml(record.origem || 'N/A')}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="detail-label">Mensagem Inicial</span>
-                    <span class="detail-value large">${escapeHtml(record.mensagem_inicial || 'N/A')}</span>
+
+                <div class="detail-item full-width" style="margin-top: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span class="detail-label">Histórico Completo da Sessão</span>
+                        <span class="badge-total-msgs">${record.qtde_mensagens || 0} interações</span>
+                    </div>
+                    <div class="chat-history-container">
+                        ${formatChatHistory(record.mensagem_inicial || 'N/A')}
+                    </div>
                 </div>
             </div>
         `;
@@ -552,6 +534,40 @@ async function viewRecord(id) {
     }
 }
 
+function formatChatHistory(text) {
+    if (!text || text === 'N/A') return '<div class="chat-message-system">Nenhum histórico disponível</div>';
+
+    // Escapa HTML para segurança e converte quebras de linha
+    const escaped = escapeHtml(text);
+
+    // Divide por linhas e tenta identificar quem mandou
+    return escaped.split('\n').map(line => {
+        if (!line.trim()) return '';
+
+        let msgClass = 'chat-message-info';
+        if (line.includes('BrokerIA:')) {
+            msgClass = 'chat-message-ai';
+        } else if (line.match(/\[.*\]/)) {
+            msgClass = 'chat-message-user';
+        }
+
+        return `<div class="chat-line ${msgClass}">${line}</div>`;
+    }).join('');
+}
+
+function getInsuranceIcon(type) {
+    const icons = {
+        'AUTOMOVEL': '🚗',
+        'RESIDENCIAL': '🏠',
+        'VIDA': '👨‍👩‍👧‍👦',
+        'SAUDE': '🏥',
+        'EMPRESARIAL': '🏢',
+        'NAO_IDENTIFICADO': '🛡️'
+    };
+    return icons[type] || '🛡️';
+}
+
+
 function closeModal() {
     document.getElementById('recordModal').classList.remove('active');
 }
@@ -561,6 +577,7 @@ function formatDateTime(dateString) {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -583,7 +600,7 @@ function formatPhone(phone) {
     // Formato: (XX) XXXXX-XXXX
     const cleaned = phone.replace(/\D/g, '');
     if (cleaned.length === 13) {
-        return `+${cleaned.slice(0, 2)} (${cleaned.slice(2, 4)}) ${cleaned.slice(4, 9)}-${cleaned.slice(9)}`;
+        return `+ ${cleaned.slice(0, 2)} (${cleaned.slice(2, 4)}) ${cleaned.slice(4, 9)} -${cleaned.slice(9)} `;
     }
     return phone;
 }

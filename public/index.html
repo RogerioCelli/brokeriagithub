@@ -193,9 +193,25 @@
                             </select>
                         </div>
                         <div class="filter-group">
+                            <label for="filterSeguro">Tipo de Seguro</label>
+                            <select id="filterSeguro" class="filter-select">
+                                <option value="">Todos</option>
+                                <option value="AUTOMOVEL">Automóvel</option>
+                                <option value="RESIDENCIAL">Residencial</option>
+                                <option value="VIDA">Vida</option>
+                                <option value="SAUDE">Saúde</option>
+                                <option value="EMPRESARIAL">Empresarial</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
                             <label for="filterTipo">Tipo de Solicitação</label>
                             <select id="filterTipo" class="filter-select">
                                 <option value="">Todos</option>
+                                <option value="Cotação de Seguro Novo">Cotação</option>
+                                <option value="Comunicação de Sinistro">Sinistro</option>
+                                <option value="Pedir Segunda Via Apólice/Boleto">Segunda Via</option>
+                                <option value="Verificar Dados da Apólice">Verificar Dados</option>
+                                <option value="Renovação de Seguro">Renovação</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -229,7 +245,8 @@
                                     <th>Data/Hora</th>
                                     <th>Nome</th>
                                     <th>Telefone</th>
-                                    <th>Tipo</th>
+                                    <th>Seguro</th>
+                                    <th>Assunto</th>
                                     <th>Status</th>
                                     <th>Etapa</th>
                                     <th>Msgs</th>
