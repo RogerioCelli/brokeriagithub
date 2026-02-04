@@ -186,17 +186,17 @@
                         <div class="filter-group">
                             <label for="filterStatus">Status</label>
                             <select id="filterStatus" class="filter-select">
-                                <option value="">Todos</option>
+                                <option value="">Todos os Status</option>
                                 <option value="PENDENTE">Pendente</option>
                                 <option value="EM_ATENDIMENTO">Em Atendimento</option>
                                 <option value="CONCLUIDO">Concluído</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="filterSeguro">Tipo de Seguro</label>
+                            <label for="filterSeguro">Seguro (Ramo)</label>
                             <select id="filterSeguro" class="filter-select">
-                                <option value="">Todos</option>
-                                <option value="AUTOMOVEL">Automóvel</option>
+                                <option value="">Todos os Ramos</option>
+                                <option value="AUTOMOVEL">Carro / Moto</option>
                                 <option value="RESIDENCIAL">Residencial</option>
                                 <option value="VIDA">Vida</option>
                                 <option value="SAUDE">Saúde</option>
@@ -204,24 +204,37 @@
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="filterTipo">Tipo de Solicitação</label>
+                            <label for="filterTipo">Nível 1 (Tipo)</label>
                             <select id="filterTipo" class="filter-select">
-                                <option value="">Todos</option>
-                                <option value="Cotação de Seguro Novo">Cotação</option>
-                                <option value="Comunicação de Sinistro">Sinistro</option>
-                                <option value="Pedir Segunda Via Apólice/Boleto">Segunda Via</option>
-                                <option value="Verificar Dados da Apólice">Verificar Dados</option>
-                                <option value="Renovação de Seguro">Renovação</option>
+                                <option value="">Todos os Tipos</option>
+                                <option value="Vendas e Cotações">Vendas / Cotações</option>
+                                <option value="Sinistros">Sinistros</option>
+                                <option value="Financeiro">Financeiro</option>
+                                <option value="Renovação">Renovação</option>
+                                <option value="Documentos">Documentos</option>
+                                <option value="Cancelamento">Cancelamento</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <label for="filterEtapa">Etapa do Funil</label>
-                            <select id="filterEtapa" class="filter-select">
+                            <label for="filterPrioridade">Prioridade</label>
+                            <select id="filterPrioridade" class="filter-select">
                                 <option value="">Todas</option>
+                                <option value="Crítica">🚨 Crítica</option>
+                                <option value="Alta">⚡ Alta</option>
+                                <option value="Média">🔵 Média</option>
+                                <option value="Baixa">🟢 Baixa</option>
                             </select>
                         </div>
                         <div class="filter-group">
-                            <button class="btn-primary" id="applyFilters">Aplicar Filtros</button>
+                            <label for="filterCliente">Tipo Cliente</label>
+                            <select id="filterCliente" class="filter-select">
+                                <option value="">Todos</option>
+                                <option value="Cliente existente">Existente</option>
+                                <option value="Não cliente">Novo Lead</option>
+                            </select>
+                        </div>
+                        <div class="filter-group filter-actions">
+                            <button class="btn-primary" id="applyFilters">Filtrar</button>
                         </div>
                     </div>
                 </div>

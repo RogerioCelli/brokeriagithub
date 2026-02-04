@@ -415,30 +415,21 @@ async function loadTimelineChart() {
 // ========== FILTERS ==========
 async function populateFilterOptions() {
     try {
-        // Tipos de solicitação
+        // Tipos de solicitação do banco (para complementar os fixos)
         const tiposResponse = await authenticatedFetch(`${API_URL}/api/registros/por-tipo`);
         const tipos = await tiposResponse.json();
 
         const tipoSelect = document.getElementById('filterTipo');
+        const existingValues = Array.from(tipoSelect.options).map(opt => opt.value);
+
         tipos.forEach(tipo => {
-            const option = document.createElement('option');
-            option.value = tipo.tipo_solicitacao;
-            option.textContent = tipo.tipo_solicitacao || 'Não especificado';
-            tipoSelect.appendChild(option);
+            if (tipo.tipo_solicitacao && !existingValues.includes(tipo.tipo_solicitacao)) {
+                const option = document.createElement('option');
+                option.value = tipo.tipo_solicitacao;
+                option.textContent = tipo.tipo_solicitacao;
+                tipoSelect.appendChild(option);
+            }
         });
-
-        // Etapas do funil
-        const etapasResponse = await authenticatedFetch(`${API_URL}/api/registros/por-etapa`);
-        const etapas = await etapasResponse.json();
-
-        const etapaSelect = document.getElementById('filterEtapa');
-        etapas.forEach(etapa => {
-            const option = document.createElement('option');
-            option.value = etapa.etapa_funil;
-            option.textContent = etapa.etapa_funil || 'Não especificado';
-            etapaSelect.appendChild(option);
-        });
-
     } catch (error) {
         console.error('Erro ao popular filtros:', error);
     }
@@ -448,16 +439,19 @@ async function applyFilters() {
     const status = document.getElementById('filterStatus').value;
     const seguro = document.getElementById('filterSeguro').value;
     const tipo = document.getElementById('filterTipo').value;
-    const etapa = document.getElementById('filterEtapa').value;
+    const prioridade = document.getElementById('filterPrioridade').value;
+    const tipoCliente = document.getElementById('filterCliente').value;
 
     const params = new URLSearchParams();
     if (status) params.append('status', status);
     if (seguro) params.append('seguro', seguro);
     if (tipo) params.append('tipo', tipo);
-    if (etapa) params.append('etapa', etapa);
+    if (prioridade) params.append('prioridade', prioridade);
+    if (tipoCliente) params.append('tipoCliente', tipoCliente);
 
     try {
         const response = await authenticatedFetch(`${API_URL}/api/registros/filtrar?${params.toString()}`);
+        if (!response.ok) throw new Error('Falha na resposta da API');
         filteredRecords = await response.json();
         renderRecordsTable(filteredRecords);
     } catch (error) {
