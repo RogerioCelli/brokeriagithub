@@ -300,7 +300,7 @@ app.get('/api/registros/telefone/:telefone', authenticateToken, async (req, res)
 // 8. Filtrar registros
 app.get('/api/registros/filtrar', authenticateToken, async (req, res) => {
     try {
-        const { status, tipo, etapa, dataInicio, dataFim } = req.query;
+        const { status, tipo, etapa, seguro, subtipo, prioridade, tipoCliente } = req.query;
 
         let query = `
       SELECT 
@@ -309,6 +309,10 @@ app.get('/api/registros/filtrar', authenticateToken, async (req, res) => {
         nome_cliente as nome_whatsapp,
         tipo_seguro,
         assunto_principal as tipo_solicitacao,
+        subtipo_solicitacao,
+        prioridade,
+        tipo_cliente,
+        responsavel,
         status_atendimento,
         qtde_mensagens,
         etapa_funil,
@@ -325,32 +329,33 @@ app.get('/api/registros/filtrar', authenticateToken, async (req, res) => {
             params.push(status);
             paramCount++;
         }
-
         if (tipo) {
             query += ` AND assunto_principal = $${paramCount}`;
             params.push(tipo);
             paramCount++;
         }
-
-        if (etapa) {
-            query += ` AND etapa_funil = $${paramCount}`;
-            params.push(etapa);
+        if (seguro) {
+            query += ` AND tipo_seguro = $${paramCount}`;
+            params.push(seguro);
+            paramCount++;
+        }
+        if (subtipo) {
+            query += ` AND subtipo_solicitacao = $${paramCount}`;
+            params.push(subtipo);
+            paramCount++;
+        }
+        if (prioridade) {
+            query += ` AND prioridade = $${paramCount}`;
+            params.push(prioridade);
+            paramCount++;
+        }
+        if (tipoCliente) {
+            query += ` AND tipo_cliente = $${paramCount}`;
+            params.push(tipoCliente);
             paramCount++;
         }
 
-        if (dataInicio) {
-            query += ` AND data_atendimento >= $${paramCount}`;
-            params.push(dataInicio);
-            paramCount++;
-        }
-
-        if (dataFim) {
-            query += ` AND data_atendimento <= $${paramCount}`;
-            params.push(dataFim);
-            paramCount++;
-        }
-
-        query += ` ORDER BY data_atendimento DESC LIMIT 100`;
+        query += ` ORDER BY data_criacao_registro DESC LIMIT 100`;
 
         const result = await pool.query(query, params);
         res.json(result.rows);

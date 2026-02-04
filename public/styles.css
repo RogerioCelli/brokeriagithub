@@ -597,6 +597,71 @@ body {
     color: var(--success-400);
 }
 
+/* Priority Badges */
+.priority-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.priority-critica {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.priority-alta {
+    background: rgba(249, 115, 22, 0.2);
+    color: #fb923c;
+}
+
+.priority-media {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+}
+
+.priority-baixa {
+    background: rgba(156, 163, 175, 0.2);
+    color: #9ca3af;
+}
+
+/* Client Type Badges */
+.client-type-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.client-cliente-existente {
+    background: #064e3b;
+    color: #34d399;
+    border: 1px solid #065f46;
+}
+
+.client-nao-cliente,
+.client-lead {
+    background: #1e293b;
+    color: #94a3b8;
+    border: 1px solid #334155;
+}
+
+/* Insurance Badges (Missing in current view) */
+.badge-seguro {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--bg-tertiary);
+}
+
 .btn-view {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);

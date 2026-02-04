@@ -185,20 +185,28 @@ function renderRecordsTable(records) {
             <td>#${record.id_atendimento}</td>
             <td>${formatDateTime(record.data_contato)}</td>
             <td>${escapeHtml(record.nome_whatsapp || 'N/A')}</td>
-            <td>${formatPhone(record.telefone)}</td>
             <td>
                 <span class="badge-seguro badge-seguro-${(record.tipo_seguro || 'NAO_IDENTIFICADO').toLowerCase()}">
                     ${getInsuranceIcon(record.tipo_seguro)} ${escapeHtml(record.tipo_seguro || 'NAO_IDENTIFICADO')}
                 </span>
             </td>
             <td>${escapeHtml(record.tipo_solicitacao || 'N/A')}</td>
+            <td>${escapeHtml(record.subtipo_solicitacao || 'N/A')}</td>
             <td>
                 <span class="status-badge-table status-${record.status_atendimento}">
                     ${formatStatus(record.status_atendimento)}
                 </span>
             </td>
-            <td>${escapeHtml(record.etapa_funil || 'N/A')}</td>
-            <td>${record.qtde_mensagens || 0}</td>
+            <td>
+                <span class="priority-badge priority-${(record.prioridade || 'Media').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">
+                    ${escapeHtml(record.prioridade || 'Média')}
+                </span>
+            </td>
+            <td>
+                <span class="client-type-badge client-${(record.tipo_cliente || 'lead').toLowerCase().replace(' ', '-')}">
+                    ${escapeHtml(record.tipo_cliente || 'Não cliente')}
+                </span>
+            </td>
             <td>
                 <button class="btn-view" onclick="viewRecord(${record.id_atendimento})">
                     Ver Chat
@@ -472,6 +480,8 @@ function handleSearch(e) {
             record.telefone?.toLowerCase().includes(searchTerm) ||
             record.nome_whatsapp?.toLowerCase().includes(searchTerm) ||
             record.tipo_solicitacao?.toLowerCase().includes(searchTerm) ||
+            record.subtipo_solicitacao?.toLowerCase().includes(searchTerm) ||
+            record.prioridade?.toLowerCase().includes(searchTerm) ||
             record.tipo_seguro?.toLowerCase().includes(searchTerm)
         );
     });
@@ -503,7 +513,15 @@ async function viewRecord(id) {
                         <div class="detail-value">${formatPhone(record.telefone)}</div>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Seguro</span>
+                        <span class="detail-label">Tipo de Cliente</span>
+                        <div class="detail-value">
+                            <span class="client-type-badge client-${(record.tipo_cliente || 'lead').toLowerCase().replace(' ', '-')}">
+                                ${escapeHtml(record.tipo_cliente || 'Não cliente')}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Seguro (Ramo)</span>
                         <div class="detail-value">
                             <span class="badge-seguro badge-seguro-${(record.tipo_seguro || 'NAO_IDENTIFICADO').toLowerCase()}">
                                 ${getInsuranceIcon(record.tipo_seguro)} ${escapeHtml(record.tipo_seguro || 'NAO_IDENTIFICADO')}
@@ -511,8 +529,24 @@ async function viewRecord(id) {
                         </div>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Assunto</span>
+                        <span class="detail-label">Nível 1 (Tipo)</span>
                         <div class="detail-value">${escapeHtml(record.tipo_solicitacao || 'N/A')}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Nível 2 (Subtipo)</span>
+                        <div class="detail-value">${escapeHtml(record.subtipo_solicitacao || 'N/A')}</div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Prioridade</span>
+                        <div class="detail-value">
+                            <span class="priority-badge priority-${(record.prioridade || 'Media').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}">
+                                ${escapeHtml(record.prioridade || 'Média')}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Responsável</span>
+                        <div class="detail-value">${escapeHtml(record.responsavel || 'Aguardando Atendente')}</div>
                     </div>
                 </div>
 
